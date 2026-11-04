@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOVA - Gestión Inteligente de Restaurantes</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        novaDark: '#0B192E',
+                        novaCard: '#112240',
+                        novaBlue: '#4C82F6',
+                        novaHoverBlue: '#60A5FA',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-novaDark text-white min-h-screen font-sans flex flex-col justify-between">
+
+    <!-- Navegación Principales / Header -->
+    <header class="border-b border-gray-800 bg-novaDark/90 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl font-extrabold tracking-wider">
+                    NO<span class="text-novaBlue">VA</span>
+                </span>
+            </div>
+            <nav class="flex items-center space-x-4">
+                <button onclick="toggleModal(true)" class="bg-novaBlue hover:bg-novaHoverBlue text-white px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 shadow-lg shadow-novaBlue/20">
+                    <i class="fas fa-plus"></i>
+                    <span>Agregar Restaurante</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        
+        <!-- Hero Section de la Imagen -->
+        <section class="mb-10 text-center sm:text-left">
+            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight mb-4 leading-tight">
+                Gestiona tu<br class="hidden sm:inline" />
+                restaurante<br class="hidden sm:inline" />
+                con <span class="text-novaBlue">inteligencia.</span>
+            </h1>
+            <p class="text-gray-400 text-base sm:text-lg max-w-2xl">
+                Controla tus ventas, pedidos, inventario y equipo de trabajo desde un solo lugar.
+            </p>
+        </section>
+
+        <!-- Barra de Filtro y Búsqueda -->
+        <section class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="relative w-full sm:w-80">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    placeholder="Buscar restaurante..." 
+                    class="w-full bg-novaCard border border-gray-700/60 rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-novaBlue transition-colors"
+                    oninput="filterRestaurants()"
+                >
+            </div>
+            <div class="text-xs text-gray-400">
+                Mostrando <span id="restaurantCount" class="font-bold text-white">0</span> restaurantes
+            </div>
+        </section>
+
+        <!-- Lista de Tarjetas de Restaurantes -->
+        <section id="restaurantGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Renderizado dinámico vía JavaScript -->
+        </section>
+    </main>
+
+    <!-- Modal para Agregar Restaurante -->
+    <div id="addModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-novaCard border border-gray-700/60 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-white">Agregar Nuevo Restaurante</h3>
+                <button onclick="toggleModal(false)" class="text-gray-400 hover:text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="restaurantForm" onsubmit="handleAddRestaurant(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Nombre del Restaurante</label>
+                    <input type="text" id="formName" required placeholder="Ej. 40TENA" class="w-full bg-novaDark border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-novaBlue">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Tipo de Cocina / Categoría</label>
+                    <input type="text" id="formCuisine" required placeholder="Ej. Fast Food, Italiana..." class="w-full bg-novaDark border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-novaBlue">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">URL del Logo</label>
+                    <input type="url" id="formLogo" placeholder="https://ejemplo.com/logo.jpg" class="w-full bg-novaDark border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-novaBlue">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Enlace a Página Web de Acceso/Ventas</label>
+                    <input type="url" id="formWebUrl" required placeholder="https://restaurante.com/login" class="w-full bg-novaDark border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-novaBlue">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Estado</label>
+                    <select id="formStatus" class="w-full bg-novaDark border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-novaBlue">
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="toggleModal(false)" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs font-semibold text-white">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-novaBlue hover:bg-novaHoverBlue rounded-lg text-xs font-semibold text-white">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script principal de lógica JS -->
+    <script>
+        // Array de datos iniciales
+        let restaurants = [
+            {
+                id: 1,
+                name: "40TENA",
+                cuisine: "Fast Food",
+                logo: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=150&auto=format&fit=crop&q=80",
+                status: "Activo",
+                webUrl: "https://script.google.com/macros/s/AKfycbxXm1MkAjwqYTfGrnnqWT_G8xqshgNY__Yg829EPhRHm6SbZ5XjqEuIwCsz-HoDfnPd/exec"
+            },
+            {
+                id: 2,
+                name: "Bella Italia",
+                cuisine: "Italiana & Pastas",
+                logo: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150&auto=format&fit=crop&q=80",
+                status: "Activo",
+                webUrl: "https://bellaitalia.com/admin"
+            },
+            {
+                id: 3,
+                name: "Sabor Grill",
+                cuisine: "Parrilla & Asados",
+                logo: "https://images.unsplash.com/photo-1544025162-d76694265947?w=150&auto=format&fit=crop&q=80",
+                status: "Inactivo",
+                webUrl: "https://saborgrill.com/acceso"
+            }
+        ];
+
+        // Función de Renderizado de la Tarjeta
+        function renderRestaurantCard(restaurant) {
+            const logo = restaurant.logo || 'https://via.placeholder.com/150';
+            const name = restaurant.name || 'Restaurante';
+            const cuisine = restaurant.cuisine || 'Comida';
+            const webUrl = restaurant.webUrl || '#';
+            const status = restaurant.status || 'Inactivo';
+
+            const isActive = status.toLowerCase() === 'activo';
+            const statusBadge = `
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${
+                    isActive 
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                        : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                }">
+                    <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}"></span>
+                    ${status}
+                </span>
+            `;
+
+            return `
+                <div class="flex items-center justify-between p-4 bg-[#112240] rounded-xl border border-gray-700/50 hover:border-[#4C82F6] transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-[#4C82F6]/5">
+                    <!-- Información Principal (Logo, Nombre, Categoría y Estado) -->
+                    <div class="flex items-center space-x-3.5">
+                        <div class="relative">
+                            <img 
+                                src="${logo}" 
+                                alt="Logo ${name}" 
+                                class="w-12 h-12 rounded-full object-cover border border-gray-600/80 shadow-sm"
+                                onerror="this.src='https://via.placeholder.com/150'"
+                            >
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-white font-semibold text-base leading-none">${name}</h4>
+                                ${statusBadge}
+                            </div>
+                            <span class="text-xs text-gray-400">${cuisine}</span>
+                        </div>
+                    </div>
+
+                    <!-- Acción: Acceso a la Web de Ventas -->
+                    <a 
+                        href="${webUrl}" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="bg-[#4C82F6] hover:bg-[#60A5FA] active:scale-95 text-white text-xs font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4C82F6]/50"
+                    >
+                        <span>Acceder a Web</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                    </a>
+                </div>
+            `;
+        }
+
+        // Cargar lista en el DOM
+        function renderAll(list = restaurants) {
+            const grid = document.getElementById('restaurantGrid');
+            const countEl = document.getElementById('restaurantCount');
+            
+            grid.innerHTML = list.map(item => renderRestaurantCard(item)).join('');
+            countEl.innerText = list.length;
+        }
+
+        // Filtrado por buscador
+        function filterRestaurants() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = restaurants.filter(r => 
+                r.name.toLowerCase().includes(query) || 
+                r.cuisine.toLowerCase().includes(query)
+            );
+            renderAll(filtered);
+        }
+
+        // Mostrar / Ocultar Modal
+        function toggleModal(show) {
+            const modal = document.getElementById('addModal');
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.getElementById('restaurantForm').reset();
+            }
+        }
+
+        // Agregar nuevo restaurante desde el formulario
+        function handleAddRestaurant(event) {
+            event.preventDefault();
+            
+            const newRest = {
+                id: Date.now(),
+                name: document.getElementById('formName').value,
+                cuisine: document.getElementById('formCuisine').value,
+                logo: document.getElementById('formLogo').value || 'https://via.placeholder.com/150',
+                webUrl: document.getElementById('formWebUrl').value,
+                status: document.getElementById('formStatus').value
+            };
+
+            restaurants.push(newRest);
+            renderAll();
+            toggleModal(false);
+        }
+
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAll();
+        });
+    </script>
+</body>
+</html>
